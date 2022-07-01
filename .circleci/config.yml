@@ -102,6 +102,8 @@ jobs:
           key: test-backend
             
   scan-frontend:
+    docker:
+      - image: circleci/node:13.8.0  
     steps:
       - checkout
       - restore_cache:
@@ -118,6 +120,8 @@ jobs:
           key: scan-frontend
 
   scan-backend:
+    docker:
+      - image: circleci/node:13.8.0  
     steps:
       - checkout
       - restore_cache:
