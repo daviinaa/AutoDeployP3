@@ -165,7 +165,7 @@ jobs:
           command: |
                 aws ec2 describe-instances \
                 --query 'Reservations[*].Instances[*].PublicIpAddress' \
-                --filters "Name=tag:aws:cloudformation:logical-id,Values=-udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+                --filters "Name=tag:aws:cloudformation:logical-id,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                 --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: .
