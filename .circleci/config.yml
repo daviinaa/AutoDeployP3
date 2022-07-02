@@ -4,7 +4,7 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     # parameters:
-    #   # Add parameter here   
+    # Add parameter here   
     steps:
       - run:
           name: Destroy environments
@@ -149,17 +149,17 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="udapeople${CIRCLE_WORKFLOW_ID:0:7}"  \
-              --tags project=udapeople
+              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
+              --tags project=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="udapeople${CIRCLE_WORKFLOW_ID:0:7}"  \
-              --tags project=udapeople
+              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
+              --tags project=udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -168,30 +168,36 @@ jobs:
                 --filters "Name=tag:aws:cloudformation:logical-id,Values=-udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                 --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: .circleci/ansible/
+          root: .
           paths:
-            - inventory.txt
-      - destroy-environment
-      # Here's where you will add some code to rollback on failure      
+            - .circleci/ansible/*
+      - destroy-environment    
 
-#   configure-infrastructure:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Configure server
-#           command: |
-#             # Your code here
-#             exit 1
-#       # Here's where you will add some code to rollback on failure      
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["2e:f6:bd:ee:cc:fa:5c:ed:c9:40:e4:2d:4f:75:60:b7"] 
+      - attach_workspace:
+          at: .
+      - run: 
+          name: View content of inventory.txt
+          command: cat .circleci/ansible/inventory.txt
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+            pip install awscli
+            aws --version
+      - run:
+          name: Configure server
+          command: | 
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment   
+   
 
 #   run-migrations:
 #     docker:
@@ -324,8 +330,8 @@ workflows:
           # filters:
           #   branches:
           #     only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
