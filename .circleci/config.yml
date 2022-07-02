@@ -168,9 +168,9 @@ jobs:
                 --filters "Name=tag:aws:cloudformation:logical-id,Values=-udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
                 --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: ./circleci/ansible/
           paths:
-            - .circleci/ansible/inventory.txt
+            - inventory.txt
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
 
