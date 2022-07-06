@@ -42,6 +42,7 @@ Outputs:
   #   Export:
   #     Name: WorkflowID
 
+# new workflow
   WorkflowIDNew:
     Value: !Sub ${WorkflowIDNew}
     Description: URL for website hosted on new S3 bucket
